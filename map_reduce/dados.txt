@@ -1,0 +1,10 @@
+Quantum physics is the study of matter and energy at the most fundamental level. It aims to uncover the properties and behaviors of the very building blocks of nature.
+While many quantum experiments examine very small objects, such as electrons and photons, quantum phenomena are all around us, acting on every scale. 
+However, we may not be able to detect them easily in larger objects. This may give the wrong impression that quantum phenomena are bizarre or otherworldly.
+In fact, quantum science closes gaps in our knowledge of physics to give us a more complete picture of our everyday lives.
+Quantum discoveries have been incorporated into our foundational understanding of materials, chemistry, biology, and astronomy.
+These discoveries are a valuable resource for innovation, giving rise to devices such as lasers and transistors,
+and enabling real progress on technologies once considered purely speculative, such as quantum computers.
+Physicists are exploring the potential of quantum science to transform our view of gravity and its connection to space and time.
+Quantum science may even reveal how everything in the universe (or in multiple universes) is connected to everything else through higher dimensions
+that our senses cannot comprehend.
