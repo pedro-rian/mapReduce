@@ -15,17 +15,15 @@ defmodule Utils do
   end
 
 	def partitioning(enumerable, tasks) do
-    size = Enum.count(enumerable)
+		size = Enum.count(enumerable)/tasks
+		size = trunc(Float.ceil(size))
 		partitioning(enumerable, tasks, size, 0)
 	end
 	defp partitioning(enumerable, tasks, size, cont) when cont < tasks do
-		#IO.inspect(Enum.slice(enumerable, cont*size, size))
-		#res = spawn(Enum, :slice, [enumerable, cont*size, size])
-		#task =
-		#IO.inspect(res)
-		#IO.puts(enumerable)
+    IO.inspect(Enum.slice(enumerable, cont*size, size))
 		[Task.async(Enum, :slice, [enumerable, cont*size, size])] ++ partitioning(enumerable, tasks, size, cont+1)
 	end
+
 	defp partitioning(_, _, _, _) do
 		[]
 	end
@@ -37,13 +35,10 @@ defmodule Utils do
 	def runTasks([]), do: nil
 
 	def runTasks(tasks) do
-		#IO.inspect(Task.await(hd(tasks)))
 		[Task.await(hd(tasks))] ++ runTasks(tl(tasks))
-
 	end
 	def rePartitioning(list) do
 		keys = listKeys(list)
-		#mergeValues(hd(keys), list)
 		_rePartitioning(keys, list)
 	end
 	def _rePartitioning([], list) do
@@ -95,29 +90,6 @@ defmodule Utils do
 
 end
 
-#input = Enum.to_list(100000..19300000)
-
-#tasks = Utils.partitioning(input, 8, 19200000)
-
-#IO.inspect(tasks)
-
-#resp = Utils.runTasks(tasks)
-
-#a = [1, 2, 3, 4, 5, 6]
-
-
-#b = [a: 1, b: 2, c: 3, d: 4, a: 10, b: 20, c: 30, d: 40]
-#IO.inspect(Keyword.keys(b))
-#IO.inspect(hd(b))
-#IO.inspect(Utils.listKeys(b))
-
-#Lembrar de descomentar abaixo
 dados = Utils.ler
 IO.inspect(Utils.rePartitioning(dados)|> Utils.somar)
-
-#IO.inspect(Utils.isInside(1, a))
-
-#IO.inspect("first")
-
-#Lembrar de descomentar abaixo
 System.halt(0)
