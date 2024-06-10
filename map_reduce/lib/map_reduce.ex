@@ -79,19 +79,26 @@ defmodule Utils do
 		end
 	end
 
-  def partitioningReduce(enumerable, tasks, function) do
-		size = Enum.count(enumerable)/tasks
-		size = trunc(Float.ceil(size))
-		partitioningReduce(enumerable, tasks, size, 0, function)
+  def partitioningReduce(enumerable, function) do
+		#size = Enum.count(enumerable)/tasks
+		#size = trunc(Float.ceil(size))
+		_partitioningReduce(enumerable, function)
 	end
 
-	defp partitioningReduce(enumerable, tasks, size, cont, function) when cont < tasks do
-		dados = hd(Enum.slice(enumerable, cont*size, size))
-		[Task.async(fn -> function.(dados) end)] ++ partitioningReduce(enumerable, tasks, size, cont+1, function)
-	end
-
-	defp partitioningReduce(_, _, _, _, _) do
+  defp _partitioningReduce(enumerable, _) when enumerable == [] do
 		[]
+	end
+
+	defp _partitioningReduce(enumerable, function) do
+		#IO.inspect(enumerable)
+		#dados = Enum.slice(enumerable, cont*size, size)
+		#IO.inspect(dados)
+		#if dados != [] do
+		dados = hd(enumerable)
+		[Task.async(fn -> function.(dados) end)] ++ partitioningReduce(tl(enumerable), function)
+		#else
+		#	partitioningReduce(enumerable, tasks, size, cont+1, function)
+		#end
 	end
 
 	def runTasksReduce([]) do
@@ -110,8 +117,7 @@ dados = Utils.ler
 tasks = Utils.partitioning(dados, 8, mapFunction)
 results = Utils.runTasks(tasks)
 rep = Utils.rePartitioning(results)
-IO.inspect(rep)
 reduceFunction = fn {chave, x} -> {chave, Enum.sum(x)} end
-reduceTasks = Utils.partitioningReduce(rep, 8, reduceFunction)
+reduceTasks = Utils.partitioningReduce(rep, reduceFunction)
 IO.inspect(Utils.runTasksReduce(reduceTasks))
 System.halt(0)
