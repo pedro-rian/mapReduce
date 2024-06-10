@@ -7,43 +7,39 @@ defmodule Utils do
       |> String.replace(".","")
       |> String.replace(",","")
       |> String.split(" ")
-      |> input
   end
 
-  def input(dados)  do
-    Enum.map(dados, fn x -> {String.to_atom(x),1} end)
-  end
-
-	def partitioning(enumerable, tasks) do
+	def partitioning(enumerable, tasks, function) do
 		size = Enum.count(enumerable)/tasks
 		size = trunc(Float.ceil(size))
-		partitioning(enumerable, tasks, size, 0)
+		partitioning(enumerable, tasks, size, 0, function)
 	end
-	defp partitioning(enumerable, tasks, size, cont) when cont < tasks do
-    IO.inspect(Enum.slice(enumerable, cont*size, size))
-		[Task.async(Enum, :slice, [enumerable, cont*size, size])] ++ partitioning(enumerable, tasks, size, cont+1)
+	defp partitioning(enumerable, tasks, size, cont, function) when cont < tasks do
+		dados = Enum.slice(enumerable, cont*size, size)
+		[Task.async(Enum, :map, [dados, function])] ++ partitioning(enumerable, tasks, size, cont+1, function)
 	end
 
-	defp partitioning(_, _, _, _) do
+	defp partitioning(_, _, _, _, _) do
 		[]
 	end
-	def receiveMessages do
-		receive do
 
-		end
+	def runTasks([]) do
+		[]
 	end
-	def runTasks([]), do: nil
 
 	def runTasks(tasks) do
-		[Task.await(hd(tasks))] ++ runTasks(tl(tasks))
+		Task.await(hd(tasks)) ++ runTasks(tl(tasks))
 	end
+
 	def rePartitioning(list) do
 		keys = listKeys(list)
 		_rePartitioning(keys, list)
 	end
+
 	def _rePartitioning([], list) do
 		list
 	end
+
 	def _rePartitioning(keys, list) do
 		list = Keyword.replace(list, hd(keys), mergeValues(hd(keys), list))
 		_rePartitioning(tl(keys), list)
@@ -57,6 +53,7 @@ defmodule Utils do
 	def _listKeys(_, emptyList, knownKeys) when emptyList == [] do
 		knownKeys
 	end
+
 	def _listKeys(keys, key, knownKeys) do
 		removeKey = Keyword.delete_first(keys, hd(key))
 		if Keyword.get(removeKey, hd(key)) != nil do
@@ -82,14 +79,39 @@ defmodule Utils do
 		end
 	end
 
-  def somar(dados) do
-    for {chave, lista} <- dados do
-      {chave, Enum.sum(lista)}
-    end
-  end
+  def partitioningReduce(enumerable, tasks, function) do
+		size = Enum.count(enumerable)/tasks
+		size = trunc(Float.ceil(size))
+		partitioningReduce(enumerable, tasks, size, 0, function)
+	end
+
+	defp partitioningReduce(enumerable, tasks, size, cont, function) when cont < tasks do
+		dados = hd(Enum.slice(enumerable, cont*size, size))
+		[Task.async(fn -> function.(dados) end)] ++ partitioningReduce(enumerable, tasks, size, cont+1, function)
+	end
+
+	defp partitioningReduce(_, _, _, _, _) do
+		[]
+	end
+
+	def runTasksReduce([]) do
+		[]
+	end
+
+	def runTasksReduce(tasks) do
+		#IO.inspect([Task.await(hd(tasks))])
+		[Task.await(hd(tasks))] ++ runTasksReduce(tl(tasks))
+	end
 
 end
-
+mapFunction = fn x -> {String.to_atom(x),1} end
 dados = Utils.ler
-IO.inspect(Utils.rePartitioning(dados)|> Utils.somar)
+#IO.inspect(Utils.rePartitioning(dados)|> Utils.somar)
+tasks = Utils.partitioning(dados, 8, mapFunction)
+results = Utils.runTasks(tasks)
+rep = Utils.rePartitioning(results)
+IO.inspect(rep)
+reduceFunction = fn {chave, x} -> {chave, Enum.sum(x)} end
+reduceTasks = Utils.partitioningReduce(rep, 8, reduceFunction)
+IO.inspect(Utils.runTasksReduce(reduceTasks))
 System.halt(0)
